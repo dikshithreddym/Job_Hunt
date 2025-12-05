@@ -39,18 +39,9 @@ jobs:
           if [ -z "$GSHEETS_CREDS_JSON" ]; then
             echo "GSHEETS_CREDS_JSON secret is missing"; exit 1
           fi
-          python - <<'PY'
-import os, json, sys
-content = os.environ.get('GSHEETS_CREDS_JSON')
-if not content:
-    print('❌ Missing GSHEETS_CREDS_JSON'); sys.exit(1)
-try:
-    json.loads(content)
-except Exception as e:
-    print('❌ Invalid service account JSON:', e); sys.exit(1)
-open('service_account.json','w', encoding='utf-8').write(content)
-print('✅ service_account.json written and valid')
-PY
+          # Write JSON exactly as provided (no extra quotes/newlines)
+          printf '%s' "$GSHEETS_CREDS_JSON" > service_account.json
+          python -c "import json; json.load(open('service_account.json')); print('✅ service_account.json written and valid')"
 
       - name: Run scraper
         env:
