@@ -52,7 +52,7 @@ LOCATIONS = [
 SITES = ["indeed", "linkedin"]
 
 RESULTS_WANTED = int("100")
-HOURS_OLD = int("500") # 24 hours + 2 extra for timezones & delays
+HOURS_OLD = int("26") # 24 hours + 2 extra for timezones & delays
 COUNTRY = "Canada"
 
 OUTPUT_DIR = "jobs_data"
@@ -188,7 +188,7 @@ def apply_sheet_formatting(service, spreadsheet_id, sheet_id, df):
     })
 
     # 3. Set fixed width (100px) for specific large columns
-    target_cols = ["job_url_direct", "company_logo", "description"]
+    target_cols = ["job_url_direct", "company_logo", "description", "emails", "company_url", "company_url_direct", "company_description"]
     for col_name in target_cols:
         if col_name in df.columns:
             try:
@@ -202,6 +202,27 @@ def apply_sheet_formatting(service, spreadsheet_id, sheet_id, df):
                             "endIndex": idx + 1,
                         },
                         "properties": {"pixelSize": 100},
+                        "fields": "pixelSize",
+                    }
+                })
+            except Exception:
+                pass # Column might not exist or be duplicate
+
+    # 4. Set fixed width (250px) for specific large columns
+    target_cols = ["title", "company"]
+    for col_name in target_cols:
+        if col_name in df.columns:
+            try:
+                idx = df.columns.get_loc(col_name)
+                requests.append({
+                    "updateDimensionProperties": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "dimension": "COLUMNS",
+                            "startIndex": idx,
+                            "endIndex": idx + 1,
+                        },
+                        "properties": {"pixelSize": 250},
                         "fields": "pixelSize",
                     }
                 })
