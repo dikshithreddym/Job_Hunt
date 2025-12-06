@@ -126,7 +126,7 @@ SPAM_KEYWORDS = [
     "curriculum developer", "education specialist",
     
     # Spam Companies
-    "Prime Jobs", "Next Jobs", "Jobs Ai", "Get Hired", "Crossover",
+    "Prime Jobs", "Next Jobs", "Jobs Ai", "Get Hired", "Crossover", "Get Jobs",
 ]
 
 # ---------------------------------------------------------
