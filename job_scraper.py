@@ -47,7 +47,7 @@ LOCATIONS = [
 SITES = ["indeed", "linkedin"]
 
 RESULTS_WANTED = int("100")
-HOURS_OLD = int("24")
+HOURS_OLD = int("28") # 28 hours = 1 day + 4 hours buffer
 COUNTRY = "Canada"
 
 OUTPUT_DIR = "jobs_data"
