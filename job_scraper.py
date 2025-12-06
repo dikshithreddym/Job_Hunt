@@ -28,6 +28,16 @@ from spam_filters import (
 load_dotenv()
 
 # ---------------------------------------------------------
+# LOGGING SETUP
+# ---------------------------------------------------------
+LOGS = []
+
+def log(msg):
+    """Prints to console and appends to global log list for email."""
+    print(msg)
+    LOGS.append(str(msg))
+
+# ---------------------------------------------------------
 # PERSONALIZED CONFIG 
 # ---------------------------------------------------------
 
@@ -229,7 +239,7 @@ def apply_sheet_formatting(service, spreadsheet_id, sheet_id, df):
             except Exception:
                 pass # Column might not exist or be duplicate
 
-    # 4. Freeze Header Row
+    # 5. Freeze Header Row
     requests.append({
         "updateSheetProperties": {
             "properties": {
@@ -244,9 +254,9 @@ def apply_sheet_formatting(service, spreadsheet_id, sheet_id, df):
     
     try:
         service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body).execute()
-        print(f"✨ Formatting applied to sheet ID {sheet_id}")
+        log(f"✨ Formatting applied to sheet ID {sheet_id}")
     except Exception as e:
-        print(f"⚠ Formatting failed for sheet ID {sheet_id}: {e}")
+        log(f"⚠ Formatting failed for sheet ID {sheet_id}: {e}")
 
 
 def save_two_sheets_to_google_sheets(today_df, sheet_url, creds_path):
@@ -288,10 +298,10 @@ def save_two_sheets_to_google_sheets(today_df, sheet_url, creds_path):
     if not existing_master.empty and "job_url" in existing_master.columns and "job_url" in today_df.columns:
         existing_urls = set(existing_master["job_url"].astype(str))
         new_jobs_df = today_df[~today_df["job_url"].astype(str).isin(existing_urls)].copy()
-        print(f"🔍 Found {len(new_jobs_df)} new jobs not in Master.")
+        log(f"🔍 Found {len(new_jobs_df)} new jobs not in Master.")
     else:
         new_jobs_df = today_df.copy()
-        print(f"🔍 Master empty or missing URL column. All {len(new_jobs_df)} jobs treated as new.")
+        log(f"🔍 Master empty or missing URL column. All {len(new_jobs_df)} jobs treated as new.")
 
     # Ensure Today worksheet exists
     ws_today = _get_or_create_worksheet(
@@ -318,7 +328,7 @@ def save_two_sheets_to_google_sheets(today_df, sheet_url, creds_path):
     ws_master.clear()
     set_with_dataframe(ws_master, combined)
 
-    print(f"✅ Saved to Google Sheets: {sh.title} → [{master_name}] and [{today_name}]")
+    log(f"✅ Saved to Google Sheets: {sh.title} → [{master_name}] and [{today_name}]")
 
     # --- APPLY FORMATTING (Optimized) ---
     if not new_jobs_df.empty:
@@ -331,15 +341,26 @@ def send_completion_email(to_email: str, sheet_url: str, gmail_user: str, gmail_
     try:
         yag = yagmail.SMTP(gmail_user, gmail_app_password)
         subject = "Job Scraping Completed"
+        
+        # Join logs for the email body
+        log_content = "\n".join(LOGS)
+        
         body = [
             "Your job scraping run has completed successfully.",
             "",
             f"Google Sheets link: {sheet_url}",
+            "",
+            "---------------------------------------------------",
+            "EXECUTION LOGS:",
+            "---------------------------------------------------",
+            log_content,
+            "",
+            "✅ Scrape completed! Good luck with your applications!"
         ]
         yag.send(to=to_email, subject=subject, contents=body)
-        print(f"📧 Completion email sent to {to_email}")
+        log(f"📧 Completion email sent to {to_email}")
     except Exception as e:
-        print(f"⚠ Failed to send email: {e}")
+        log(f"⚠ Failed to send email: {e}")
 
 
 if __name__ == "__main__":
@@ -348,13 +369,13 @@ if __name__ == "__main__":
     raw = scrape_all_jobs()
 
     if raw.empty:
-        print("⚠ No jobs found. Try adjusting HOURS_OLD or search terms.")
+        log("⚠ No jobs found. Try adjusting HOURS_OLD or search terms.")
         exit()
 
     cleaned = clean_results(raw)
 
-    print(f"\n🧾 Total raw jobs scraped: {len(raw)}")
-    print(f"✅ Total after cleaning & dedupe: {len(cleaned)}")
+    log(f"\n🧾 Total raw jobs scraped: {len(raw)}")
+    log(f"✅ Total after cleaning & dedupe: {len(cleaned)}")
 
     sheet_url = os.getenv("SHEET_URL")
     creds_path = os.getenv("GSHEETS_CREDS_PATH", "service_account.json")
@@ -376,6 +397,6 @@ if __name__ == "__main__":
     if gmail_user and gmail_app_password and to_email:
         send_completion_email(to_email, sheet_url, gmail_user, gmail_app_password)
     else:
-        print("⚠ Email not sent: missing GMAIL_USER/MAIL_APP_PASSWORD/TO_EMAIL in env.")
+        log("⚠ Email not sent: missing GMAIL_USER/MAIL_APP_PASSWORD/TO_EMAIL in env.")
 
-    print("\n✅ Scrape completed! Good luck with your applications!\n")
+    log("\n✅ Scrape completed! Good luck with your applications!\n")
