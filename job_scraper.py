@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from jobspy import scrape_jobs
 import pandas as pd
 import gspread
@@ -124,9 +125,12 @@ SPAM_KEYWORDS = [
     # Education/Teaching
     "professor", "instructor", "teacher", "tutor", "lecturer",
     "curriculum developer", "education specialist",
-    
-    # Spam Companies
-    "Prime Jobs", "Next Jobs", "Jobs Ai", "Get Hired", "Crossover", "Get Jobs",
+]
+
+# Additional spam/fake companies filter (matches `company` column)
+SPAM_COMPANIES = [
+    "Prime Jobs", "Next Jobs", "Jobs Ai", "Get Hired", "Crossover",
+    "Get Jobs", "Jobsmast", "Hiring Hub", "Tech Jobs Fast",
 ]
 
 # ---------------------------------------------------------
@@ -176,14 +180,21 @@ def clean_results(df: pd.DataFrame):
 
     # Lowercase all spam keywords for comparison
     spam_keywords_lower = [kw.lower() for kw in SPAM_KEYWORDS]
+    spam_companies_lower = [kw.lower() for kw in SPAM_COMPANIES]
 
     def contains_spam(text):
         text = str(text).lower()
         return any(kw in text for kw in spam_keywords_lower)
 
+    # Company spam matcher
+    def company_is_spam(text):
+        text = str(text).lower()
+        return any(kw in text for kw in spam_companies_lower)
+
     mask = ~(
         df["title"].apply(contains_spam) |
-        df.get("description", pd.Series("", index=df.index)).apply(contains_spam)
+        df.get("description", pd.Series("", index=df.index)).apply(contains_spam) |
+        df.get("company", pd.Series("", index=df.index)).apply(company_is_spam)
     )
     df = df[mask].copy()
 
@@ -275,7 +286,9 @@ def save_two_sheets_to_google_sheets(today_df, sheet_url, creds_path):
     sh = gc.open_by_url(sheet_url)
 
     # Worksheet names
-    today_name = f"Today-{datetime.now().strftime('%Y%m%d')}"
+    # Use Toronto timezone for date in sheet name
+    toronto_now = datetime.now(ZoneInfo("America/Toronto"))
+    today_name = f"Today-{toronto_now.strftime('%Y%m%d')}"
     master_name = "Master"
 
     # Ensure worksheets exist sized roughly to data
