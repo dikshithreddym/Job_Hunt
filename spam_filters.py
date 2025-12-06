@@ -49,7 +49,8 @@ SPAM_KEYWORDS = [
     "people services", "recruitment", "talent acquisition",
 
     # Specialized Fields Outside Your Domain
-    "Java Developer", "Video Editor", "Videographer", "devops lead", "site reliability lead", "infrastructure architect",
+    "Java Developer", "Java", ".net", "Video Editor", "Videographer", "devops lead",
+    "site reliability lead", "infrastructure architect",
     "database administrator", "dba", "system administrator",
     "network engineer", "telecommunications", "telecom",
     "quality assurance lead", "qa lead", "test lead", "Android",
@@ -73,28 +74,45 @@ SPAM_KEYWORDS = [
     "professor", "instructor", "teacher", "tutor", "lecturer",
     "curriculum developer", "education specialist",
 
-    # More Keywords
+    # 🚫 Social / Mental Health / Support Roles
     "Crisis Responder", "Behaviour Analyst", "Social Worker", "Case Manager",
-    "Occupational Therapist", "Speech Language Pathologist", "Audiologist", "Rehabilitation Specialist",
-    "Mental Health Worker", "Addiction Counselor", "Therapeutic Support Staff", "Child and Youth Worker",
-    "Early Childhood Educator", "Educational Assistant", "Special Education Teacher", "Learning Support Specialist",
-    "Guidance Counselor", "Career Advisor", "Academic Advisor", "School Psychologist",  "School Nurse",
-    "Librarian", "Library Technician", "Archivist", "Museum Curator",   "Conservation Technician", "Exhibit Designer", "Art Handler",
-    "Gallery Manager", "Registrar", "Collections Manager", "Education Coordinator", "Public Programs Specialist", "Development Officer", "Fundraising Coordinator",
-    "Grant Writer", "Donor Relations Manager", "Event Planner", "Volunteer Coordinator", "Membership Coordinator",
-    "Communications Specialist", "Public Relations Officer", "Marketing Coordinator", "Social Media Manager",
-    "Content Creator", "Copywriter", "Editor", "Proofreader", "Translator", "Interpreter",
-    "Technical Writer", "Journalist", "Reporter", "News Anchor", "Broadcast Technician",
-    "Camera Operator", "Sound Engineer", "Lighting Technician", "Video Producer", "Film Editor", "Production Assistant",
-    "Set Designer", "Costume Designer", "Makeup Artist", "Script Supervisor", "Location Scout",
-    "Casting Director", "Talent Agent", "Art Director", "Creative Director", "Visual Effects Artist", "Animator", "Game Designer",
+    "Occupational Therapist", "Speech Language Pathologist", "Audiologist",
+    "Rehabilitation Specialist", "Mental Health Worker", "Addiction Counselor",
+    "Therapeutic Support Staff", "Child and Youth Worker",
+    "Early Childhood Educator", "Educational Assistant",
+    "Special Education Teacher", "Learning Support Specialist",
+    "Guidance Counselor", "Career Advisor", "Academic Advisor",
+    "School Psychologist", "School Nurse",
 
+    # 📚 Library / Museum / Heritage
+    "Librarian", "Library Technician", "Archivist", "Museum Curator",
+    "Conservation Technician", "Exhibit Designer", "Art Handler",
+    "Gallery Manager", "Registrar", "Collections Manager",
+    "Education Coordinator", "Public Programs Specialist",
+    "Development Officer", "Fundraising Coordinator",
+    "Grant Writer", "Donor Relations Manager", "Membership Coordinator",
+
+    # 📣 Comms / Marketing / Media / Content
+    "Communications Specialist", "Public Relations Officer",
+    "Marketing Coordinator", "Social Media Manager",
+    "Content Creator", "Copywriter", "Editor", "Proofreader",
+    "Translator", "Interpreter", "Technical Writer", "Journalist",
+    "Reporter", "News Anchor", "Broadcast Technician",
+    "Camera Operator", "Sound Engineer", "Lighting Technician",
+    "Video Producer", "Film Editor", "Production Assistant",
+
+    # 🎭 Creative / Arts / Production
+    "Set Designer", "Costume Designer", "Makeup Artist",
+    "Script Supervisor", "Location Scout", "Casting Director",
+    "Talent Agent", "Art Director", "Creative Director",
+    "Visual Effects Artist", "Animator", "Game Designer",
+
+    # 🧠 Mental Health / Clinical Support
     "Psychotherapist", "Psychologist", "Counselor", "Counsellor",
     "Addictions Counselor", "Substance Use Counselor",
     "Caseworker", "Case Worker", "Support Worker",
-    "Personal Support Worker", "PSW",
-    "Residential Support Worker", "Shelter Worker",
-    "Housing Support Worker", "Outreach Worker",
+    "Personal Support Worker", "PSW", "Residential Support Worker",
+    "Shelter Worker", "Housing Support Worker", "Outreach Worker",
     "Community Support Worker", "Community Worker",
     "Family Support Worker", "Family Therapist",
     "Youth Counselor", "Youth Counsellor", "Youth Worker",
@@ -108,28 +126,29 @@ SPAM_KEYWORDS = [
     "Addiction Worker", "Mental Health Counselor",
     "Psychometrist",
 
+    # 🎓 Education / School / Academic
     "Teacher", "Elementary Teacher", "High School Teacher",
     "Secondary Teacher", "College Instructor", "College Professor",
     "University Professor", "Faculty Member", "Lecturer",
-    "Instructor", "Tutor", "Teaching Assistant",
+    "Instructor", "Teaching Assistant",
     "Professor Emeritus", "Adjunct Professor",
     "Department Chair", "Principal", "Vice Principal",
     "Dean", "School Administrator", "School Principal",
     "Education Assistant", "Instructional Coach",
-    "Curriculum Developer", "Curriculum Specialist",
-    "Education Specialist", "Learning Specialist",
+    "Curriculum Specialist", "Learning Specialist",
     "Student Success Advisor", "Student Services Officer",
     "Residence Life Coordinator", "Residence Advisor",
     "Camp Counsellor", "Camp Counselor",
 
+    # 🏛 Museum / Heritage (more)
     "Curatorial Assistant", "Curatorial Associate",
-    "Curatorial Fellow", "Heritage Interpreter",
-    "Heritage Officer", "Heritage Planner",
-    "Museum Educator", "Museum Technician",
+    "Curatorial Fellow", "Heritage Interpreter", "Heritage Officer",
+    "Heritage Planner", "Museum Educator", "Museum Technician",
     "Collections Assistant", "Collections Technician",
-    "Records Manager", "Records Technician",
-    "Documentalist", "Archivist Assistant",
+    "Records Manager", "Records Technician", "Documentalist",
+    "Archivist Assistant",
 
+    # 🎯 Nonprofit / Fundraising / Events / Outreach
     "Development Coordinator", "Development Associate",
     "Development Manager", "Major Gifts Officer",
     "Philanthropy Officer", "Stewardship Officer",
@@ -141,6 +160,7 @@ SPAM_KEYWORDS = [
     "Conference Planner", "Special Events Coordinator",
     "Volunteer Manager", "Volunteer Program Manager",
 
+    # 📣 Comms / Brand / Marketing (more)
     "Communications Officer", "Communications Manager",
     "Communications Advisor", "Communications Consultant",
     "Brand Manager", "Brand Strategist",
@@ -151,6 +171,7 @@ SPAM_KEYWORDS = [
     "Public Affairs Specialist", "Public Information Officer",
     "Community Relations Coordinator",
 
+    # 🎭 Theatre / Stage / Production Crew
     "Stage Manager", "Assistant Stage Manager",
     "Theatre Technician", "Theatre Manager",
     "Props Master", "Props Assistant",
@@ -160,6 +181,72 @@ SPAM_KEYWORDS = [
     "Colorist", "Gaffer", "Best Boy",
     "Grip", "Production Designer",
     "Production Coordinator", "Production Manager",
+
+    # 🏗️ Non-software Engineering (mechanical/civil/etc.)
+    "Manufacturing Engineer", "Manufacturing Engineering",
+    "Manufacturing Analyst", "Industrial Engineer",
+    "Mechanical Systems Engineer", "Structural Engineer",
+    "Geotechnical Engineer", "Mining Engineer", "Miner",
+    "Rock Mechanics Engineer", "Hydraulic Engineer",
+    "Hydraulics Engineer", "HVDC Engineer", "Power Engineer",
+    "Substation Engineer", "Building Engineer",
+    "HVAC Engineer", "HVAC Engineering",
+    "Process Improvement Engineer", "Applied Dynamics Engineer",
+    "Aviation Engineer", "Aircraft Structural", "Aircraft Dynamics",
+    "Hydromechanical Engineer", "Airworthiness Engineer",
+    "Thermodynamics Engineer", "Thermal Engineer", "Fluid Engineer",
+    "Nuclear Operator", "Nuclear Engineer",
+    "Microfluidics Engineer", "Stationary Engineer",
+    "Conveyance Engineer",
+
+    # 🛠 Trades / Technicians / Plant
+    "Machining Specialist", "Assembler", "Assembly",
+    "Valve Technician", "Robot Programmer", "Robotics Technician",
+    "CNC", "Millwright", "Injection Molding",
+    "Paint Technician", "Welding Specialist",
+    "Quality Continuous Improvement Technician",
+    "Transport Sustaining Engineer", "Shop Technician",
+    "Machine Operator", "Operator",
+    "Plant Technician", "Maintenance Technician",
+
+    # 🧪 Lab / Wet-lab / Bio / Physical Sciences
+    "Microbiologist", "Clinical Research",
+    "Research Assistant (Physical Sciences)",
+    "Lab Technician", "Scientist (wet lab)",
+    "Biomedical", "Health Content Editor",
+
+    # 🧾 Accounting / Bookkeeping (pure finance ops)
+    "accounting specialist", "accounts payable",
+    "accounts receivable", "bookkeeper",
+
+    # 🗂️ Admin / Office (non-technical)
+    "Administrator", "Scheduling Coordinator", "Renewal Administrator",
+    "Service Administrator", "Shop Administrator",
+    "Office Administrator", "Housing Administrative",
+    "Reporting Analyst (non-technical)",
+
+    # ⚖️ Legal / Governance
+    "Legal Counsel", "Lawyer", "Regulatory Affairs",
+    "Governance",
+
+    # 🎨 Generic non-tech design
+    "Designer (non-UI)", "Motion Designer",
+    "Graphic Designer", "Brand/UI Designer",
+
+    # 🚚 Supply Chain / Logistics / Procurement
+    "Supply Chain", "Procurement", "Logistics",
+    "Operations Analyst (non-technical)",
+    "Replenishment Analyst", "Vendor Analyst",
+
+    # 🔐 Physical Security (not cyber)
+    "Security Guard", "Guard", "Security Officer",
+
+    # 👷 Misc unrelated jobs
+    "Mechanic", "Bowling Mechanic",
+    "Warehouse", "Factory", "Laborer",
+    "Bartender", "Cook", "Driver",
+    "Field Technician",
+    "Estimator", "Scheduler",
 ]
 
 # Additional spam/fake companies filter (matches `company` column)

@@ -10,7 +10,14 @@ import os
 import yagmail
 from dotenv import load_dotenv
 import time
+import socket
 from googleapiclient.errors import HttpError
+
+# ---------------------------------------------------------
+# 🔧 OPTIMIZATION: Increase default timeout to 10 minutes
+# This fixes "The read operation timed out" on large sheets
+# ---------------------------------------------------------
+socket.setdefaulttimeout(600)
 from spam_filters import (
     SPAM_KEYWORDS,
     SPAM_COMPANIES,
@@ -60,6 +67,42 @@ MASTER_FILE = "canada_ml_jobs_master.csv"
 # Spam filters are imported from spam_filters.py
 
 
+def scrape_all_jobs():
+    all_results = []
+
+    for search in SEARCH_TERMS:
+        for loc in LOCATIONS:
+            print(f"\n🔍 Searching '{search}' in '{loc}'...")
+
+            try:
+                jobs = scrape_jobs(
+                    site_name=SITES,
+                    search_term=search,
+                    location=loc,
+                    results_wanted=RESULTS_WANTED,
+                    hours_old=HOURS_OLD,
+                    country_indeed=COUNTRY,
+                    linkedin_fetch_description=False,
+                    verbose=1,
+                )
+                df = pd.DataFrame(jobs)
+
+                # Store metadata for analysis later
+                if not df.empty:
+                    df["search_term_used"] = search
+                    df["location_used"] = loc
+                    all_results.append(df)
+
+            except Exception as e:
+                print(f"❌ Error scraping {search} in {loc}: {e}")
+
+    if not all_results:
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_results, ignore_index=True)
+    return final_df
+
+
 def clean_results(df: pd.DataFrame):
     if df.empty:
         return df
@@ -102,82 +145,162 @@ def clean_results(df: pd.DataFrame):
     return df
 
 
-def save_to_google_sheets(df, sheet_url, creds_path):
-    # Drop empty columns
-    df = df.dropna(axis=1, how='all')
-    # Authenticate and open sheet by URL (more reliable than title)
+def _get_or_create_worksheet(sh, title, rows=100, cols=30):
+    ws = None
+    for w in sh.worksheets():
+        if w.title == title:
+            ws = w
+            break
+    if ws is None:
+        ws = sh.add_worksheet(title=title, rows=rows, cols=cols)
+    return ws
+
+def apply_sheet_formatting(service, spreadsheet_id, sheet_id, df):
+    """
+    Applies all formatting (Auto-fit, Row Height, Column Widths) in a SINGLE batch request.
+    This is much faster and prevents timeouts.
+    """
+    requests = []
+
+    # 1. Set Row Height to 21px for all rows
+    requests.append({
+        "updateDimensionProperties": {
+            "range": {
+                "sheetId": sheet_id,
+                "dimension": "ROWS",
+                "startIndex": 0,
+            },
+            "properties": {"pixelSize": 21},
+            "fields": "pixelSize",
+        }
+    })
+
+    # 2. Auto-fit all columns
+    requests.append({
+        "autoResizeDimensions": {
+            "dimensions": {
+                "sheetId": sheet_id,
+                "dimension": "COLUMNS",
+                "startIndex": 0,
+                "endIndex": len(df.columns)
+            }
+        }
+    })
+
+    # 3. Set fixed width (100px) for specific large columns
+    target_cols = ["job_url_direct", "company_logo", "description"]
+    for col_name in target_cols:
+        if col_name in df.columns:
+            try:
+                idx = df.columns.get_loc(col_name)
+                requests.append({
+                    "updateDimensionProperties": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "dimension": "COLUMNS",
+                            "startIndex": idx,
+                            "endIndex": idx + 1,
+                        },
+                        "properties": {"pixelSize": 100},
+                        "fields": "pixelSize",
+                    }
+                })
+            except Exception:
+                pass # Column might not exist or be duplicate
+
+    # 4. Freeze Header Row
+    requests.append({
+        "updateSheetProperties": {
+            "properties": {
+                "sheetId": sheet_id,
+                "gridProperties": {"frozenRowCount": 1}
+            },
+            "fields": "gridProperties.frozenRowCount"
+        }
+    })
+
+    body = {"requests": requests}
+    
+    try:
+        service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body).execute()
+        print(f"✨ Formatting applied to sheet ID {sheet_id}")
+    except Exception as e:
+        print(f"⚠ Formatting failed for sheet ID {sheet_id}: {e}")
+
+
+def save_two_sheets_to_google_sheets(today_df, sheet_url, creds_path):
+    # Drop fully empty columns
+    today_df = today_df.dropna(axis=1, how='all')
+
+    # Auth and open
     gc = gspread.service_account(filename=creds_path)
     sh = gc.open_by_url(sheet_url)
-    worksheet = sh.get_worksheet(0)  # First worksheet
-    worksheet.clear()  # Optional: clear old data
-    set_with_dataframe(worksheet, df)
-    print(f"✅ Saved to Google Sheets: {sh.title}")
-
-def autofit_columns(sheet_url: str, creds_path: str):
-    # Extract spreadsheet ID from URL
-    try:
-        spreadsheet_id = sheet_url.split("/d/")[1].split("/")[0]
-    except Exception:
-        print("⚠ Could not parse spreadsheet ID from URL.")
-        return
-
-    # Auth scopes for Sheets and Drive
+    spreadsheet_id = sh.id
+    
+    # Build Sheets API service
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive",
     ]
     creds = Credentials.from_service_account_file(creds_path, scopes=scopes)
-
-    # Get first worksheet's sheetId via gspread
-    gc = gspread.service_account(filename=creds_path)
-    sh = gc.open_by_url(sheet_url)
-    ws = sh.get_worksheet(0)
-    sheet_id = ws._properties.get("sheetId")
-    if sheet_id is None:
-        print("⚠ Could not determine sheetId for first worksheet.")
-        return
-
     service = build("sheets", "v4", credentials=creds)
-    body = {
-        "requests": [
-            {
-                "autoResizeDimensions": {
-                    "dimensions": {
-                        "sheetId": sheet_id,
-                        "dimension": "COLUMNS",
-                        "startIndex": 0,
-                    }
-                }
-            }
-        ]
-    }
 
-def retry_batch_update(service, spreadsheet_id: str, body: dict, max_retries: int = 3, initial_delay: float = 2.0):
-    """
-    Execute Sheets batchUpdate with simple exponential backoff retries.
-    Retries on HttpError 429/5xx and socket timeouts.
-    """
-    delay = initial_delay
-    for attempt in range(1, max_retries + 1):
-        try:
-            service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body).execute()
-            return
-        except HttpError as e:
-            status = getattr(e, 'status_code', None)
-            if status and (status == 429 or 500 <= status < 600):
-                if attempt < max_retries:
-                    time.sleep(delay)
-                    delay *= 2
-                    continue
-            # For non-retriable or final attempt, re-raise
-            raise
-        except Exception as e:
-            msg = str(e).lower()
-            if ("timeout" in msg or "timed out" in msg) and attempt < max_retries:
-                time.sleep(delay)
-                delay *= 2
-                continue
-            raise
+    # Worksheet names
+    toronto_now = datetime.now(ZoneInfo("America/Toronto"))
+    today_name = f"Today-{toronto_now.strftime('%Y%m%d')}"
+    master_name = "Master"
+
+    # Ensure worksheets exist
+    ws_today = _get_or_create_worksheet(
+        sh, today_name, rows=len(today_df)+50, cols=len(today_df.columns)+5
+    )
+    ws_master = _get_or_create_worksheet(
+        sh, master_name, rows=len(today_df)+50, cols=len(today_df.columns)+5
+    )
+
+    # --- WRITE TODAY SHEET ---
+    ws_today.clear()
+    set_with_dataframe(ws_today, today_df)
+    
+    # --- WRITE MASTER SHEET ---
+    try:
+        existing_master = pd.DataFrame(ws_master.get_all_records())
+        if not existing_master.empty:
+            combined = pd.concat([existing_master, today_df], ignore_index=True)
+            combined.drop_duplicates(subset=["job_url"], inplace=True)
+            
+            # Re-sort Master by date if possible
+            if "date_posted" in combined.columns:
+                combined["date_posted"] = pd.to_datetime(combined["date_posted"], errors="coerce")
+                combined.sort_values("date_posted", ascending=False, inplace=True)
+        else:
+            combined = today_df
+    except Exception:
+        combined = today_df
+
+    ws_master.clear()
+    set_with_dataframe(ws_master, combined)
+
+    print(f"✅ Saved to Google Sheets: {sh.title} → [{master_name}] and [{today_name}]")
+
+    # --- APPLY FORMATTING (Optimized) ---
+    apply_sheet_formatting(service, spreadsheet_id, ws_today.id, today_df)
+    apply_sheet_formatting(service, spreadsheet_id, ws_master.id, combined)
+
+
+def send_completion_email(to_email: str, sheet_url: str, gmail_user: str, gmail_app_password: str):
+    try:
+        yag = yagmail.SMTP(gmail_user, gmail_app_password)
+        subject = "Job Scraping Completed"
+        body = [
+            "Your job scraping run has completed successfully.",
+            "",
+            f"Google Sheets link: {sheet_url}",
+        ]
+        yag.send(to=to_email, subject=subject, contents=body)
+        print(f"📧 Completion email sent to {to_email}")
+    except Exception as e:
+        print(f"⚠ Failed to send email: {e}")
 
 
 if __name__ == "__main__":
