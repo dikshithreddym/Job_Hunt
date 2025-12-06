@@ -124,6 +124,9 @@ SPAM_KEYWORDS = [
     # Education/Teaching
     "professor", "instructor", "teacher", "tutor", "lecturer",
     "curriculum developer", "education specialist",
+    
+    # Spam Companies
+    "Prime Jobs", "Next Jobs", "Jobs Ai", "Get Hired", "Crossover",
 ]
 
 # ---------------------------------------------------------
