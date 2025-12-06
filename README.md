@@ -49,7 +49,7 @@ Open your fork’s repository on GitHub → Settings → Secrets and variables �
 
 Add the following secrets:
 - `GSHEETS_CREDS_JSON`: Paste the full JSON content of the service account key file.
-- `SHEET_URL`: The Google Sheet URL you created.
+- `SHEET_URL` & `GSHEETS_CREDS_PATH`: The Google Sheet URL you created.
 - `GMAIL_USER`: Your Gmail address (sender).
 - `MAIL_APP_PASSWORD`: Your Gmail App Password (not your regular password). Create one in Google Account → Security → App passwords.
 - `TO_EMAIL`: The email to receive the completion notification.
