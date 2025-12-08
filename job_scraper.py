@@ -61,7 +61,7 @@ LOCATIONS = [
 
 SITES = ["indeed", "linkedin"]
 
-RESULTS_WANTED = int("100")
+RESULTS_WANTED = int("50")
 HOURS_OLD = int("26") # 24 hours + 2 extra for timezones & delays
 COUNTRY = "Canada"
 
