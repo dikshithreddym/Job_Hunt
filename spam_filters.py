@@ -260,7 +260,7 @@ SPAM_COMPANIES = [
     "EviSmart™", "Spait Infotech Private Limited", "Themesoft Inc.", "Mindrift", "Canonical", 
     "V-Soft Consulting Group, Inc.", "Compunnel Inc.", "Avanciers", "Avanciers Inc.", "Avancier's Inc.",  # covers all variations
     "Apexon", "Iris Software Inc.", "Galent", "n2psystems",
-    "Resonaite", "Astra-North Infoteck Inc.", "Alimentiv"
+    "Resonaite", "Astra-North Infoteck Inc.", "Alimentiv", "Consultant en Livraison", 
     "Seven Hills Group Technologies Inc.", "Dexian", "DISYS",  # Dexian = former DISYS
     "Raas Infotek", "Kumaran Systems", "Luxoft", "Synechron",
     "Collabera", "Flexton Inc.", "Agilus Work Solutions",
