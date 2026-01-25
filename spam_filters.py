@@ -266,7 +266,7 @@ SPAM_COMPANIES = [
     "Collabera", "Flexton Inc.", "Agilus Work Solutions",
     "Procom", "TEKsystems", "Robert Half", "Call For Referral",
     "Randstad Digital", "Randstad Digital Americas", "Next Match AI",
-    "Hays", "Insight Global", "Andiamo", "Swoon",
+    "Hays", "Insight Global", "Andiamo", "Swoon", "Jerry", "CLEAResult", "micro1", "SOFTLINE TECHNOLOGY", ""
     "HCR Permanent Search", "Signature IT World Inc.",
     "Nexus Systems Group", "Altis Technology", "excelHR",
     "BeachHead", "Bevertec", "Robertson & Company Ltd.",        
