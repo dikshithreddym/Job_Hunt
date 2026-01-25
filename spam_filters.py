@@ -60,7 +60,7 @@ SPAM_KEYWORDS = [
 
     # Internships/Co-op (if you want full-time only)
     "intern", "internship", "co-op", "co op", "student position",
-    "summer student", "coop", "stage", "stagiaire",
+    "summer student", "coop", "stage", "stagiaire", "Consultant en Livraison"
 
     # Healthcare/Medical/Clinical
     "clinical", "healthcare practitioner", "medical", "pharmaceutical",
